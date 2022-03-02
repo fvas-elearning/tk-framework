@@ -38,6 +38,8 @@ class Callback
     }
 
     /**
+     * Callback: function (\Dom\Template $fieldGroup, \Tk\Form\Renderer\FieldGroup $element) { }
+     *
      * @param callable|null $callable
      * @param int $priority
      * @return $this
@@ -52,6 +54,8 @@ class Callback
     }
 
     /**
+     * Callback: function (\Dom\Template $fieldGroup, \Tk\Form\Renderer\FieldGroup $element) { }
+     *
      * @param callable|null $callable
      * @param int $priority
      * @return $this
@@ -78,6 +82,17 @@ class Callback
             $this->callbackList = array();
         }
         return $this;
+    }
+
+    /**
+     * Alias for reset()
+     *
+     * @param null $priority
+     * @return callable
+     */
+    public function clear($priority = null)
+    {
+        return $this->reset($priority);
     }
 
     /**

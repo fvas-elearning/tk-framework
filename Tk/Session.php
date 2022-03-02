@@ -156,9 +156,28 @@ class Session implements \ArrayAccess
             session_id($this->getRequest()->get($sesName));
         }
         // Start the session!
-        session_set_cookie_params(time() + (int)$this->getParam('session.gc_maxlifetime'),
-            $this->getCookie()->getPath(), $this->getCookie()->getDomain(),
-            $this->getCookie()->isSecure(), $this->getCookie()->isHttponly());
+        if (PHP_VERSION_ID >= 70300) {
+            $s = (int)$this->getCookie()->isSecure();
+            $ho = (int)$this->getCookie()->isHttponly();
+            $cfg = [
+                'lifetime' =>  time() + (int)$this->getParam('session.gc_maxlifetime'),
+                'path' => $this->getCookie()->getPath(),
+                'domain' => $this->getCookie()->getDomain(),
+                'secure' => "$s",
+                'httponly' => "$ho",
+                'samesite' => 'strict',
+                //'samesite' => 'None',
+            ];
+            session_set_cookie_params($cfg);
+
+        } else {
+//            if ($this->getCookie()->isSecure()) {
+//                ini_set('session.cookie_secure', 'On');
+//            }
+            session_set_cookie_params(time() + (int)$this->getParam('session.gc_maxlifetime'),
+                $this->getCookie()->getPath() . '; samesite=strict', $this->getCookie()->getDomain(),
+                $this->getCookie()->isSecure(), $this->getCookie()->isHttponly());
+        }
         session_start();
         $this->started = true;
 
@@ -432,14 +451,15 @@ class Session implements \ArrayAccess
      * or null if data is bound under the name.
      *
      * @param string $key The key to retrieve the data.
+     * @param null|mixed $default
      * @return mixed
      */
-    public function get($key)
+    public function get($key, $default = null)
     {
         if (isset($_SESSION[$key])) {
             return $_SESSION[$key];
         }
-        return null;
+        return $default;
     }
 
     /**

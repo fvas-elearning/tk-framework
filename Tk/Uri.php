@@ -34,7 +34,11 @@ class Uri implements \Serializable, \IteratorAggregate
      * @var string
      */
     public static $BASE_URL_PATH = '';
-    
+
+    const SCHEME_HTTP = 'http';
+    const SCHEME_HTTP_SSL = 'https';
+    const SCHEME_FTP = 'ftp';
+
     /**
      * This is the supplied full/partial uri
      * @var string
@@ -163,8 +167,13 @@ class Uri implements \Serializable, \IteratorAggregate
             return;
         }
 
-        if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') {
-            $this->scheme = 'https';
+        //vd($_SERVER['HTTPS'], $_SERVER['REQUEST_SCHEME'], $_SERVER['SERVER_PORT']);
+        if ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ||
+            (isset($_SERVER['REQUEST_SCHEME']) && $_SERVER['REQUEST_SCHEME'] == self::SCHEME_HTTP_SSL) ||
+            (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT']))
+        {
+        //if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') {
+            $this->scheme = self::SCHEME_HTTP_SSL;
         }
 
         if (\Tk\Config::getInstance()->get('site.host')) {
@@ -346,7 +355,7 @@ class Uri implements \Serializable, \IteratorAggregate
      * Add a field to the query string
      *
      * @param string $field
-     * @param string $value
+     * @param string|string[] $value
      * @return static
      */
     public function set($field, $value = null)

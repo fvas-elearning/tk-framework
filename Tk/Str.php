@@ -47,6 +47,21 @@ class Str
     }
 
     /**
+     * @param string $html
+     * @param array $tags
+     * @param array $styles
+     * @return string
+     */
+    public static function stripStyles($html, $tags = array('table', 'th', 'tr', 'td', 'tbody', 'thead'), $styles = array('height', 'width'))
+    {
+        foreach ($styles as $style) {
+            $reg = sprintf('/(<%s)(.*)(%s: [0-9a-z]+;)/i', implode('|', $tags), $style);
+            $html = preg_replace($reg, '$1$2', $html);
+        }
+        return $html;
+    }
+
+    /**
      * prepend each line with an index number
      *
      * @param $str
@@ -73,6 +88,18 @@ class Str
     }
 
     /**
+     * Convert to CamelCase so "Test FuncName" would convert to "testFuncName"
+     * Adds a capital at the first char and ass a space before all other upper case chars
+     *
+     * @param string $str
+     * @return string
+     */
+    public static function toCamelCase($str)
+    {
+        return lcfirst(str_replace(' ', '', ucwords(str_replace(['_', '-'], ' ', $str))));
+    }
+
+    /**
      * Convert camel case words so "testFunc" would convert to "Test Func"
      * Adds a capital at the first char and ass a space before all other upper case chars
      *
@@ -83,6 +110,48 @@ class Str
     {
         return ucfirst(preg_replace('/[A-Z]/', ' $0', $str));
     }
+
+    /**
+     * Replace any double control/linefeed characters with a single
+     * character
+     *
+     * @param string $str
+     * @param string $replace (optional) The newline replacement string
+     * @return string
+     */
+    public static function singleNewLines($str, $replace = "\n")
+    {
+        //return preg_replace('~(*BSR_ANYCRLF)\R~', $replace, $str);
+        return preg_replace('~(*BSR_ANYCRLF)\R{2}~', $replace, $str);
+    }
+
+
+    /**
+     * Explode using multiple delimiters
+     *
+     * @param array $delimiters
+     * @param string $string
+     * @return false|string[]
+     */
+    public static function explode(array $delimiters, string $string)
+    {
+        return explode( chr( 1 ), str_replace( $delimiters, chr( 1 ), $string ) );
+    }
+
+    /**
+     * @param string[] $arr
+     * @return string[]
+     */
+    public static function trimArray(array $arr)
+    {
+        $a = array();
+        foreach ($arr as $k => $v) {
+            if ($v == null || trim($v) == '') continue;
+            $a[$k] = trim($v);
+        }
+        return $a;
+    }
+
 
     /**
      * Substring without losing word meaning and
@@ -195,11 +264,12 @@ class Str
 
     /**
      * @param string $str
+     * @param string $replacement
      * @return string|string[]|null
      */
-    public static function stripEntities($str)
+    public static function stripEntities($str, $replacement = '')
     {
-        return preg_replace('/&#?[a-z0-9]+;/i','', $str);
+        return preg_replace('/&#?[a-z0-9]+;/i',$replacement, $str);
     }
 
     /**

@@ -84,7 +84,8 @@ class ObjectUtil
             $property = $reflect->getProperty($name);
 
             if ($property) {
-                $property->setAccessible(true);
+                if (!$property->isPublic())
+                    $property->setAccessible(true);
                 $property->setValue($object, $value);
             } else {
                 \Tk\Log::warning('TODO: Do we set an objects props here???');
@@ -207,13 +208,43 @@ class ObjectUtil
     }
 
     /**
+     * Return the classname of an object or return the given parameter
+     *
+     * @param string|object $obj
+     * @return mixed|string
+     */
+    public static function getClass($obj)
+    {
+        if (is_object($obj))
+            return get_class($obj);
+        return $obj;
+    }
+
+    /**
+     * Return true if a class uses the given trail
+     *
+     * @param object|string $obj An object (class instance) or a string (class name).
+     * @param string $trait
+     * @return bool
+     */
+    public static function classUses($obj, $trait)
+    {
+        $arr = class_uses($obj);
+        foreach ($arr as $v) {
+            if ($v == $trait) return true;
+        }
+        return false;
+    }
+
+    /**
      * Get a list of constant name value pairs for a passed class name
      *
      * @param string|object $class A
      * @param string $prefix If set will only return const values whose name starts with this prefix
+     * @param bool $autoName Not be sure that there are no duplicate constant values if this option is true
      * @return array
      */
-    public static function getClassConstants($class, $prefix = '')
+    public static function getClassConstants($class, $prefix = '', $autoName = false)
     {
         if (is_object($class)) {
             $class = get_class($class);
@@ -230,6 +261,9 @@ class ObjectUtil
             }
             foreach ($constList as $k => $v) {
                 if (substr($k, 0, strlen($prefix)) == $prefix) {
+                    if ($autoName) {
+                        $k = ucwords(preg_replace('/[A-Z]/', ' $0', $v));
+                    }
                     $retList[$k] = $v;
                 }
             }

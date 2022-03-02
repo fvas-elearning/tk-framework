@@ -19,12 +19,11 @@ trait ConfigTrait
     }
 
     /**
-     * @param string $name
      * @return \PDO|Db\Pdo|null
      */
-    public function getDb($name = 'db')
+    public function getDb()
     {
-        return $this->getConfig()->getDb($name);
+        return $this->getConfig()->getDb();
     }
 
     /**
@@ -45,12 +44,22 @@ trait ConfigTrait
 
     /**
      * Return the currently authenticated (logged in) user
-     * @return \Bs\Db\UserIface|\App\Db\User
+     * @return \Bs\Db\UserIface|\Bs\Db\User|\Uni\Db\User|\App\Db\User
      */
     public function getAuthUser()
     {
         return $this->getConfig()->getAuthUser();
     }
+
+    /**
+     * Do we have an authorized user logged in
+     * @return bool
+     */
+    public function hasAuthUser()
+    {
+        return $this->getConfig()->hasAuthUser();
+    }
+
 
     /**
      * @return Uri
